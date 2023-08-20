@@ -12,6 +12,7 @@ export default {
         }
     },
     computed: {
+        // Группированные по date строки
         grouped() {
             return this.tableRows.reduce((acc, n) => {
                 (acc[n.date] = acc[n.date] || []).push(n);
@@ -21,6 +22,8 @@ export default {
     },
     mounted() {
         this.tableRows = this.rows;
+        // Подпишемся на событие создания записи в rows
+        // и в случае если ещё нет в таблице строки с таким id - отобразим
         Echo.private('rows').listen('RowsUpdated', (e) => {
             let exists = this.tableRows.findIndex((r) => {
                 return r.id === e.rows.id;

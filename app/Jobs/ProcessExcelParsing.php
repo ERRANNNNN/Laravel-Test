@@ -26,6 +26,9 @@ class ProcessExcelParsing implements ShouldQueue
 
     protected int $rowsPerIteration = 1000;
 
+    /**
+     * @param string $filePath
+     */
     public function __construct(string $filePath)
     {
         $this->filePath = $filePath;
@@ -36,6 +39,7 @@ class ProcessExcelParsing implements ShouldQueue
      */
     public function handle(): void
     {
+        //Инициализируем все необходимые данные
         $this->excelService = new ExcelService($this->filePath);
         $currentRowsProcessed = Cache::get('excel_rows_processed', $this->sheetFirstRow);
         $totalRows = Cache::get('excel_total_rows', $this->excelService->getTotalRows('A'));
@@ -44,20 +48,20 @@ class ProcessExcelParsing implements ShouldQueue
             'B' => 'name',
             'C' => 'date'
         ];
-        Log::info('CurrenRowsProcessed ' . $currentRowsProcessed);
+
+        //Получим данные из excel
         $data = $this->excelService
             ->getFormattedData($currentRowsProcessed, $colsNames, $this->rowsPerIteration);
-        $data = (new Collection($data))->map(function ($row) {
+
+        //Создадим записи в таблице rows и отправим события о создании записей
+        $data = (new Collection($data))->each(function ($row) {
             $rows = Rows::create(['excel_id' => $row['excel_id'], 'name' => $row['name'], 'date' => $row['date']]);
             broadcast(new RowsUpdated($rows));
-            return $rows;
         });
 
-
-        Log::info('data ' . json_encode($data));
-
-
         $newRowsProcessed = $currentRowsProcessed + count($data);
+
+        //Если процесс парсинга не завершен, то вызываем Job ещё раз, в случае завершения очищаем кэш
         if ($totalRows > $newRowsProcessed) {
             Cache::set('excel_rows_processed', $newRowsProcessed);
             dispatch(new ProcessExcelParsing($this->filePath));

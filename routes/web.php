@@ -3,33 +3,26 @@
 use App\Http\Controllers\ExcelUploadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RowsController;
-use App\Models\Rows;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
+//Главная страница
 Route::get('/', function () {
     return view('welcome');
 });
 
+//"Личный кабинет" пользователя
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::resource('/excel', ExcelUploadController::class)->name('all', 'excel');
+    //Контроллер отображения формы загрузки и самой загрузки excel файла
+    Route::resource('/excel', ExcelUploadController::class)->only(['create', 'store'])->name('all', 'excel');
+    //Отображение импортированных из excel строк
     Route::get('/rows', [RowsController::class, 'index'])->name('rows');
 
+    //Работа с профилем пользователя
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
