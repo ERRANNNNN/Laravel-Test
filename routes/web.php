@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 //Главная страница
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
 //"Личный кабинет" пользователя
 Route::get('/dashboard', function () {
