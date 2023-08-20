@@ -1,7 +1,22 @@
+/**
+ * First we will load all of this project's JavaScript dependencies which
+ * includes Vue and other libraries. It is a great starting point when
+ * building robust, powerful web applications using Vue and Laravel.
+ */
+
 import './bootstrap';
+import { createApp } from 'vue';
 
-import Alpine from 'alpinejs';
+/**
+ * Next, we will create a fresh Vue application instance. You may then begin
+ * registering components with the application instance so they are ready
+ * to use in your application's views. An example is included for you.
+ */
 
-window.Alpine = Alpine;
+const app = createApp({});
 
-Alpine.start();
+import RowsTableComponent from "./components/RowsTableComponent.vue";
+
+app.component('rows-table-component', RowsTableComponent)
+
+app.mount('#app');
